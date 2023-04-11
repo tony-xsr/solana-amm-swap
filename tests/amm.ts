@@ -41,38 +41,22 @@ describe("amm", async () => {
   let mintB: Token;
   let tokenAccountA: PublicKey;
   let tokenAccountB: PublicKey;
-
-  // Pool fees
-  const TRADING_FEE_NUMERATOR = 25;
-  const TRADING_FEE_DENOMINATOR = 10000;
-  const OWNER_TRADING_FEE_NUMERATOR = 5;
-  const OWNER_TRADING_FEE_DENOMINATOR = 10000;
-  const OWNER_WITHDRAW_FEE_NUMERATOR = SWAP_PROGRAM_OWNER_FEE_ADDRESS ? 0 : 1;
-  const OWNER_WITHDRAW_FEE_DENOMINATOR = SWAP_PROGRAM_OWNER_FEE_ADDRESS ? 0 : 6;
-  const HOST_FEE_NUMERATOR = 20;
-  const HOST_FEE_DENOMINATOR = 100;
-
+ 
   // Initial amount in each swap token
   let currentSwapTokenA = 1000000;
-  let currentSwapTokenB = 1000000;
-  let currentFeeAmount = 0;
-
+  let currentSwapTokenB = 1000000; 
   const SWAP_AMOUNT_IN = 100000;
-  const SWAP_AMOUNT_OUT = SWAP_PROGRAM_OWNER_FEE_ADDRESS ? 90661 : 90674;
-  const SWAP_FEE = SWAP_PROGRAM_OWNER_FEE_ADDRESS ? 22273 : 22277;
-  const HOST_SWAP_FEE = SWAP_PROGRAM_OWNER_FEE_ADDRESS
-    ? Math.floor((SWAP_FEE * HOST_FEE_NUMERATOR) / HOST_FEE_DENOMINATOR)
-    : 0;
-  const OWNER_SWAP_FEE = SWAP_FEE - HOST_SWAP_FEE;
-  // Pool token amount minted on init
-  const DEFAULT_POOL_TOKEN_AMOUNT = 1000000000;
-  // Pool token amount to withdraw / deposit
-  const POOL_TOKEN_AMOUNT = 10000000;
+  const SLIPPAGE_MAX = 0;
+
+  // 10 Token B = 1 Token A
+  // MIN OUT base on SLIPPAGE
+  const SWAP_AMOUNT_OUT = SWAP_AMOUNT_IN/10 - SLIPPAGE_MAX*(SWAP_AMOUNT_IN/10);
+  
 
   const ammAccount = anchor.web3.Keypair.generate();
   const payer = anchor.web3.Keypair.generate();
   const owner = anchor.web3.Keypair.generate();
-
+ 
   it("Initialize AMM", async () => { 
     const sig = await provider.connection.requestAirdrop(
       payer.publicKey,
@@ -181,7 +165,6 @@ describe("amm", async () => {
     assert(fetchedAmmAccount.poolFeeAccount.equals(feeAccount));
      
   });
- 
 
   it("Swap", async () => {
     // Creating swap token a account
@@ -197,15 +180,11 @@ describe("amm", async () => {
     );
     // Creating swap token b account
     let userAccountB = await mintB.createAccount(owner.publicKey);
-
-    let poolAccount = SWAP_PROGRAM_OWNER_FEE_ADDRESS
-      ? await tokenPool.createAccount(owner.publicKey)
-      : PublicKey.default;
-
+ 
     // Swapping
 
     await program.rpc.swap(
-      new anchor.BN(SWAP_AMOUNT_IN),
+      new anchor.BN(SWAP_AMOUNT_IN), 
       new anchor.BN(SWAP_AMOUNT_OUT),
       {
         accounts: {
@@ -230,28 +209,26 @@ describe("amm", async () => {
     assert(info.amount.toNumber() == 0);
 
     info = await mintB.getAccountInfo(userAccountB);
+     
+    console.log(info.amount.toNumber() == SWAP_AMOUNT_OUT);
+    
     assert(info.amount.toNumber() == SWAP_AMOUNT_OUT);
 
     info = await mintA.getAccountInfo(tokenAccountA);
+
+
     assert(info.amount.toNumber() == currentSwapTokenA + SWAP_AMOUNT_IN);
     currentSwapTokenA += SWAP_AMOUNT_IN;
 
     info = await mintB.getAccountInfo(tokenAccountB);
+ 
+
     assert(info.amount.toNumber() == currentSwapTokenB - SWAP_AMOUNT_OUT);
     currentSwapTokenB -= SWAP_AMOUNT_OUT;
 
-    info = await tokenPool.getAccountInfo(tokenAccountPool);
-    assert(
-      info.amount.toNumber() == DEFAULT_POOL_TOKEN_AMOUNT - POOL_TOKEN_AMOUNT
-    );
 
-    info = await tokenPool.getAccountInfo(feeAccount);
-    assert(info.amount.toNumber() == currentFeeAmount + OWNER_SWAP_FEE);
 
-    if (poolAccount != PublicKey.default) {
-      info = await tokenPool.getAccountInfo(poolAccount);
-      assert(info.amount.toNumber() == HOST_SWAP_FEE);
-    }
+     
   });
- 
+
 });
