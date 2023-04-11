@@ -23,8 +23,6 @@ pub mod amm {
 
     pub fn initialize(
         ctx: Context<Initialize>,
-        fees_input: FeesInput,
-        curve_input: CurveInput,
     ) -> Result<()> {
         if ctx.accounts.amm.is_initialized {
             return Err(SwapError::AlreadyInUse.into());
@@ -61,7 +59,14 @@ pub mod amm {
         if ctx.accounts.token_a.mint == ctx.accounts.token_b.mint {
             return Err(SwapError::RepeatedMint.into());
         }
-
+        //At initialization, the swap creator sets the cost for 1 token A in terms of token B. 
+        //For example, if the price is set to 10, 10 token B will always be required to receive 1 token A, 
+        //and 1 token B will always be required to receive 0.1 token A.
+        //In this example , i have set Curve as Constant Price 
+        let curve_input = CurveInput {
+            curve_type: CurveType::ConstantPrice as u8,
+            curve_parameters: 10,
+        };
         let curve = build_curve(&curve_input).unwrap();
         curve
             .calculator
@@ -88,6 +93,10 @@ pub mod amm {
         if *ctx.accounts.pool_mint.to_account_info().key != ctx.accounts.fee_account.mint {
             return Err(SwapError::IncorrectPoolMint.into());
         }
+
+        // Set fee for swap transaction .
+        // By hashcode default all fee are ZERO.
+        let fees_input = FeesInput::default();
         let fees = build_fees(&fees_input).unwrap();
 
         if let Some(swap_constraints) = SWAP_CONSTRAINTS {
