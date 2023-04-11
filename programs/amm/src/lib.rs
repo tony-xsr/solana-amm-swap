@@ -20,7 +20,6 @@ declare_id!("8b5j5Ua8jBDqnCZNB22NJAedd5TBs5NBAjqF65q8BpuS");
 #[program]
 pub mod amm {
     use super::*;
-
     pub fn initialize(
         ctx: Context<Initialize>,
     ) -> Result<()> {
@@ -143,7 +142,7 @@ pub mod amm {
         if amm.to_account_info().owner != ctx.program_id {
             return Err(ProgramError::IncorrectProgramId.into());
         }
-
+        
         if *ctx.accounts.authority.key
             != authority_id(ctx.program_id, amm.to_account_info().key, amm.bump_seed)?
         {
@@ -199,7 +198,9 @@ pub mod amm {
                 trade_direction,
                 &fees,
             )
-            .ok_or(SwapError::ZeroTradingTokens)?;
+        .ok_or(SwapError::ZeroTradingTokens)?;
+
+        
         if result.destination_amount_swapped < u128::try_from(minimum_amount_out).unwrap() {
             return Err(SwapError::ExceededSlippage.into());
         }
@@ -216,54 +217,13 @@ pub mod amm {
         };
 
         let seeds = &[&amm.to_account_info().key.to_bytes(), &[amm.bump_seed][..]];
-
+    
         token::transfer(
             ctx.accounts
                 .into_transfer_to_swap_source_context()
                 .with_signer(&[&seeds[..]]),
             u64::try_from(result.source_amount_swapped).unwrap(),
         )?;
-
-        let mut pool_token_amount = curve
-            .withdraw_single_token_type_exact_out(
-                result.owner_fee,
-                swap_token_a_amount,
-                swap_token_b_amount,
-                u128::try_from(ctx.accounts.pool_mint.supply).unwrap(),
-                trade_direction,
-                &fees,
-            )
-            .ok_or(SwapError::FeeCalculationFailure)?;
-
-        if pool_token_amount > 0 {
-            // Allow error to fall through
-            if *ctx.accounts.host_fee_account.key != Pubkey::new_from_array([0; 32]) {
-                let host = Account::<TokenAccount>::try_from(&ctx.accounts.host_fee_account)?;
-                if *ctx.accounts.pool_mint.to_account_info().key != host.mint {
-                    return Err(SwapError::IncorrectPoolMint.into());
-                }
-                let host_fee = fees
-                    .host_fee(pool_token_amount)
-                    .ok_or(SwapError::FeeCalculationFailure)?;
-                if host_fee > 0 {
-                    pool_token_amount = pool_token_amount
-                        .checked_sub(host_fee)
-                        .ok_or(SwapError::FeeCalculationFailure)?;
-                    token::mint_to(
-                        ctx.accounts
-                            .into_mint_to_host_context()
-                            .with_signer(&[&seeds[..]]),
-                        u64::try_from(host_fee).unwrap(),
-                    )?;
-                }
-            }
-            token::mint_to(
-                ctx.accounts
-                    .into_mint_to_pool_context()
-                    .with_signer(&[&seeds[..]]),
-                u64::try_from(pool_token_amount).unwrap(),
-            )?;
-        }
 
         token::transfer(
             ctx.accounts
