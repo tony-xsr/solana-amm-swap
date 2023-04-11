@@ -205,7 +205,7 @@ pub mod amm {
             return Err(SwapError::ExceededSlippage.into());
         }
 
-        let (swap_token_a_amount, swap_token_b_amount) = match trade_direction {
+        let (_swap_token_a_amount, _swap_token_b_amount) = match trade_direction {
             TradeDirection::AtoB => (
                 result.new_swap_source_amount,
                 result.new_swap_destination_amount,
@@ -1144,24 +1144,6 @@ impl<'info> Swap<'info> {
         let cpi_accounts = Transfer {
             from: self.swap_destination.to_account_info().clone(),
             to: self.destination_info.clone(),
-            authority: self.authority.clone(),
-        };
-        CpiContext::new(self.token_program.clone(), cpi_accounts)
-    }
-
-    fn into_mint_to_host_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
-        let cpi_accounts = MintTo {
-            mint: self.pool_mint.to_account_info().clone(),
-            to: self.host_fee_account.clone(),
-            authority: self.authority.clone(),
-        };
-        CpiContext::new(self.token_program.clone(), cpi_accounts)
-    }
-
-    fn into_mint_to_pool_context(&self) -> CpiContext<'_, '_, '_, 'info, MintTo<'info>> {
-        let cpi_accounts = MintTo {
-            mint: self.pool_mint.to_account_info().clone(),
-            to: self.fee_account.to_account_info().clone(),
             authority: self.authority.clone(),
         };
         CpiContext::new(self.token_program.clone(), cpi_accounts)
