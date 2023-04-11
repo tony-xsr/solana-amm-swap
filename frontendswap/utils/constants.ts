@@ -4,9 +4,9 @@ export const tokenSwapStateAccount = new Web3.PublicKey(
     "EV7FEEq2EyTFtKx4ukp2QfW9mWLGcJckGGBNp5cjcHUe"
 )
 
-// export const swapAuthority = new Web3.PublicKey(
-//     "24zqZMTYLVk4gm62seqU7KhBwvi3uBGtyDbnsC4rkbuR"
-// )
+export const swapAuthority = new Web3.PublicKey(
+    "24zqZMTYLVk4gm62seqU7KhBwvi3uBGtyDbnsC4rkbuR"
+)
 
 export const poolKryptAccount = new Web3.PublicKey(
     "BVPUZrv5nk3jMyTWkZdxvp2LuyPF1DmGTyR8AzKvgZgN"
@@ -24,9 +24,9 @@ export const tokenAccountPool = new Web3.PublicKey(
     "Fp1W1KHuakombQATnToDCSpTnqLicFEfxWgtCAWbuvCM"
 )
 
-// export const feeAccount = new Web3.PublicKey(
-//     "EY4hgx73saq9xuLr85HNaxGMAK6R5TkvuSDchKbpt291"
-// )
+export const feeAccount = new Web3.PublicKey(
+    "HL6Zpg8L68kRbPAfKxWp8nV9C64sByMYKqju3Kenz6JX"
+)
 
 export const wSolanaMint = new Web3.PublicKey(
     "So11111111111111111111111111111111111111112"
@@ -50,6 +50,6 @@ export const TOKEN_SWAP_PROGRAM_ID = new Web3.PublicKey(
     "6VL38pW6bCq2muuCmnF7Hcb1HHwFZ5KPLm4kfEPTLDjH"
 )
 
-// export const ASSOCIATED_TOKEN_PROGRAM_ID = new Web3.PublicKey(
-//     "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
-// )
+export const ASSOCIATED_TOKEN_PROGRAM_ID = new Web3.PublicKey(
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+)

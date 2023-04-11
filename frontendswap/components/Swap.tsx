@@ -167,14 +167,14 @@ export const SwapToken: FC = () => {
                                 value="option1"
                             >
                                 {" "}
-                                Krypt{" "}
+                                wSOL{" "}
                             </option>
                             <option
                                 style={{ color: "#282c34" }}
                                 value="option2"
                             >
                                 {" "}
-                                Scrooge{" "}
+                                MOVE{" "}
                             </option>
                         </Select>
                     </div>

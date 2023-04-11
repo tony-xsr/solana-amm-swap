@@ -3,7 +3,7 @@ import type { NextPage } from "next"
 import Head from "next/head"
 import { AppBar } from "../components/AppBar"
 import styles from "../styles/Home.module.css"
-import { Airdrop } from "../components/AirdropForm"
+// import { Airdrop } from "../components/AirdropForm"
 import { TokenSwapForm } from "../components/TokenSwapForm"
 
 const Home: NextPage = () => {
@@ -15,7 +15,7 @@ const Home: NextPage = () => {
             <AppBar />
             <Center>
                 <Box>
-                    <Airdrop />
+                    {/* <Airdrop /> */}
                     <TokenSwapForm />
                 </Box>
             </Center>
