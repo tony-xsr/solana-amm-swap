@@ -3,19 +3,13 @@ import { Program } from "@project-serum/anchor";
 import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet"; 
 import ammIdl from "../target/idl/amm.json";
 import { PublicKey, Connection, Commitment } from "@solana/web3.js";
-import { TOKEN_PROGRAM_ID, Token, u64 } from "@solana/spl-token";
+import { TOKEN_PROGRAM_ID, Token, } from "@solana/spl-token";
 import * as BufferLayout from "buffer-layout";
-import { assert } from "chai";
-import { TypeDef } from "@project-serum/anchor/dist/cjs/program/namespace/types";
+import { assert } from "chai"; 
 import { Idl, } from "@project-serum/anchor/dist/cjs/idl"; 
 import dotenv from "dotenv";
 dotenv.config();
 
-const CurveType = Object.freeze({
-  ConstantProduct: 0, // Constant product curve, Uniswap-style
-  ConstantPrice: 1, // Constant price curve, always X amount of A token for 1 B token, where X is defined at init
-  Offset: 3, // Offset curve, like Uniswap, but with an additional offset on the token B side
-});
 
 describe("amm", async () => {
   const commitment: Commitment = "processed";
