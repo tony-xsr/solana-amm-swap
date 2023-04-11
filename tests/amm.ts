@@ -10,6 +10,11 @@ import { Idl, } from "@project-serum/anchor/dist/cjs/idl";
 import dotenv from "dotenv";
 dotenv.config();
 
+const CurveType = Object.freeze({
+  ConstantProduct: 0, // Constant product curve, Uniswap-style
+  ConstantPrice: 10, // Constant price curve, always X amount of A token for 10 B token, where X is defined at init
+  Offset: 3, // Offset curve, like Uniswap, but with an additional offset on the token B side
+});
 
 describe("amm", async () => {
   const commitment: Commitment = "processed";
@@ -132,7 +137,18 @@ describe("amm", async () => {
     ]);
     let data = Buffer.alloc(1024);
     const encodeLength = commandDataLayout.encode(
- 
+      {
+        tradeFeeNumerator: 0,
+        tradeFeeDenominator: 0,
+        ownerTradeFeeNumerator: 0,
+        ownerTradeFeeDenominator: 0,
+        ownerWithdrawFeeNumerator: 0,
+        ownerWithdrawFeeDenominator: 0,
+        hostFeeNumerator: 0,
+        hostFeeDenominator: 0,
+        curveType: CurveType.ConstantProduct,
+        curveParameters: 0,
+      },
       data
     );
     data = data.slice(0, encodeLength);
