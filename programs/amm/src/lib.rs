@@ -142,7 +142,7 @@ pub mod amm {
         if amm.to_account_info().owner != ctx.program_id {
             return Err(ProgramError::IncorrectProgramId.into());
         }
-        
+
         if *ctx.accounts.authority.key
             != authority_id(ctx.program_id, amm.to_account_info().key, amm.bump_seed)?
         {
@@ -942,7 +942,7 @@ pub const SWAP_CONSTRAINTS: Option<SwapConstraints> = {
         None
     }
 };
-
+ 
 impl<'a> SwapConstraints<'a> {
     /// Checks that the provided curve is valid for the given constraints
     pub fn validate_curve(&self, swap_curve: &SwapCurve) -> Result<()> {
@@ -1061,7 +1061,7 @@ impl<'info> WithdrawAllTokenTypes<'info> {
     fn into_burn_context(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
         let cpi_accounts = Burn {
             mint: self.pool_mint.to_account_info().clone(),
-            to: self.source_info.clone(),
+            from: self.source_info.clone(),
             authority: self.user_transfer_authority_info.clone(),
         };
         CpiContext::new(self.token_program.clone(), cpi_accounts)
@@ -1101,7 +1101,7 @@ impl<'info> WithdrawSingleTokenType<'info> {
     fn into_burn_context(&self) -> CpiContext<'_, '_, '_, 'info, Burn<'info>> {
         let cpi_accounts = Burn {
             mint: self.pool_mint.to_account_info().clone(),
-            to: self.source.to_account_info().clone(),
+            from: self.source.to_account_info().clone(),
             authority: self.user_transfer_authority_info.clone(),
         };
         CpiContext::new(self.token_program.clone(), cpi_accounts)
