@@ -2,7 +2,7 @@
 anchor_escrow = "8b5j5Ua8jBDqnCZNB22NJAedd5TBs5NBAjqF65q8BpuS"
 
 [provider]
-cluster = "https://rpc-mainnet-fork.dappio.xyz"
+cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
