@@ -1,71 +1,34 @@
-# `@project-serum/swap-ui`
+This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-[![Build Status](https://travis-ci.com/project-serum/swap-ui.svg?branch=master)](https://travis-ci.com/project-serum/swap-ui)
-[![npm](https://img.shields.io/npm/v/@project-serum/swap-ui.svg)](https://www.npmjs.com/package/@project-serum/swap-ui)
+## Getting Started
 
-A reusable React component for swapping on the Serum DEX. The Solana program can be
-found [here](https://github.com/project-serum/swap).
+First, run the development server:
 
-## Usage
-
-#### Install
-
-First install the required peer dependencies into your React project.
-
-```
-yarn add @material-ui/core @material-ui/icons @material-ui/lab @project-serum/anchor @solana/spl-token-registry @solana/web3.js material-ui-popup-state react-async-hook
+```bash
+npm run dev
+# or
+yarn dev
 ```
 
-Then install the package.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```
-yarn add @project-serum/swap-ui
-```
+You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
 
-#### Add the Swap Component
+[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
 
-To embed the `Swap` component into your application,
-one can minimally provide an [Anchor](https://github.com/project-serum/anchor)
-[Provider](https://project-serum.github.io/anchor/ts/classes/provider.html)
-and [TokenListContainer](https://github.com/solana-labs/token-list).
-For example,
+The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
 
- ```javascript
-<Swap provider={provider} tokenList={tokenList} />
-```
+## Learn More
 
-All of the complexity of communicating with the Serum DEX and managing
-its data is handled internally by the component.
+To learn more about Next.js, take a look at the following resources:
 
-#### Referral Fees
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-To earn referral fees, one can also pass in a `referral` property,
-which is the `PublicKey` of the Solana wallet that *owns* the associated
-token accounts in which referral fees are paid (i.e., USDC and USDT).
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
 
-## Developing
+## Deploy on Vercel
 
-#### Install dependencies
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
-```
-yarn
-```
-
-#### Build
-
-```
-yarn build
-```
-
-## Run the example app
-
-For local development and educational purposes, a minimal React app is provided
-in the `example/` subdirectory.
-
-To run, change directories via `cd example/` and start the app.
-
-### Start the app
-
-```
-yarn start
-```
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
