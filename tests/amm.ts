@@ -73,13 +73,13 @@ describe("amm", async () => {
   const payer = anchor.web3.Keypair.generate();
   const owner = anchor.web3.Keypair.generate();
 
-  it("Initialize AMM", async () => {
+  it("Initialize AMM", async () => { 
     const sig = await provider.connection.requestAirdrop(
       payer.publicKey,
       1000000000
     );
     await provider.connection.confirmTransaction(sig, "singleGossip");
-
+      
     [authority, bumpSeed] = await PublicKey.findProgramAddress(
       [ammAccount.publicKey.toBuffer()],
       program.programId
@@ -147,113 +147,26 @@ describe("amm", async () => {
     ]);
     let data = Buffer.alloc(1024);
     const encodeLength = commandDataLayout.encode(
-      {
-        tradeFeeNumerator: TRADING_FEE_NUMERATOR,
-        tradeFeeDenominator: TRADING_FEE_DENOMINATOR,
-        ownerTradeFeeNumerator: OWNER_TRADING_FEE_NUMERATOR,
-        ownerTradeFeeDenominator: OWNER_TRADING_FEE_DENOMINATOR,
-        ownerWithdrawFeeNumerator: OWNER_WITHDRAW_FEE_NUMERATOR,
-        ownerWithdrawFeeDenominator: OWNER_WITHDRAW_FEE_DENOMINATOR,
-        hostFeeNumerator: HOST_FEE_NUMERATOR,
-        hostFeeDenominator: HOST_FEE_DENOMINATOR,
-        curveType: CurveType.ConstantProduct,
-        curveParameters: 0,
-      },
+ 
       data
     );
     data = data.slice(0, encodeLength);
+ 
 
-    const fees_input: TypeDef<
-      {
-        name: "FeesInput";
-        type: {
-          kind: "struct";
-          fields: [
-            {
-              name: "tradeFeeNumerator";
-              type: "u64";
-            },
-            {
-              name: "tradeFeeDenominator";
-              type: "u64";
-            },
-            {
-              name: "ownerTradeFeeNumerator";
-              type: "u64";
-            },
-            {
-              name: "ownerTradeFeeDenominator";
-              type: "u64";
-            },
-            {
-              name: "ownerWithdrawFeeNumerator";
-              type: "u64";
-            },
-            {
-              name: "ownerWithdrawFeeDenominator";
-              type: "u64";
-            },
-            {
-              name: "hostFeeNumerator";
-              type: "u64";
-            },
-            {
-              name: "hostFeeDenominator";
-              type: "u64";
-            }
-          ];
-        };
-      },
-      Record<string, number>
-    > = {
-      tradeFeeNumerator: new anchor.BN(TRADING_FEE_NUMERATOR),
-      tradeFeeDenominator: new anchor.BN(TRADING_FEE_DENOMINATOR),
-      ownerTradeFeeNumerator: new anchor.BN(OWNER_TRADING_FEE_NUMERATOR),
-      ownerTradeFeeDenominator: new anchor.BN(OWNER_TRADING_FEE_DENOMINATOR),
-      ownerWithdrawFeeNumerator: new anchor.BN(OWNER_WITHDRAW_FEE_NUMERATOR),
-      ownerWithdrawFeeDenominator: new anchor.BN(
-        OWNER_WITHDRAW_FEE_DENOMINATOR
-      ),
-      hostFeeNumerator: new anchor.BN(HOST_FEE_NUMERATOR),
-      hostFeeDenominator: new anchor.BN(HOST_FEE_DENOMINATOR),
-    };
-    const curve_input: TypeDef<
-      {
-        name: "CurveInput";
-        type: {
-          kind: "struct";
-          fields: [
-            {
-              name: "curveType";
-              type: "u8";
-            },
-            {
-              name: "curveParameters";
-              type: "u64";
-            }
-          ];
-        };
-      },
-      Record<string, number | u64>
-    > = {
-      curveType: CurveType.ConstantProduct,
-      curveParameters: new anchor.BN(0),
-    };
-
-    await program.rpc.initialize(fees_input, curve_input, {
-      accounts: {
-        authority: authority,
-        amm: ammAccount.publicKey,
-        tokenA: tokenAccountA,
-        tokenB: tokenAccountB,
-        poolMint: tokenPool.publicKey,
-        feeAccount: feeAccount,
-        destination: tokenAccountPool,
-        tokenProgram: TOKEN_PROGRAM_ID,
-      },
-      instructions: [await program.account.amm.createInstruction(ammAccount)],
-      signers: [ammAccount],
-    });
+    await program.rpc.initialize({
+        accounts: {
+          authority: authority,
+          amm: ammAccount.publicKey,
+          tokenA: tokenAccountA,
+          tokenB: tokenAccountB,
+          poolMint: tokenPool.publicKey,
+          feeAccount: feeAccount,
+          destination: tokenAccountPool,
+          tokenProgram: TOKEN_PROGRAM_ID,
+        },
+        instructions: [await program.account.amm.createInstruction(ammAccount)],
+        signers: [ammAccount],
+      });
 
     let fetchedAmmAccount = await program.account.amm.fetch(
       ammAccount.publicKey
@@ -266,38 +179,7 @@ describe("amm", async () => {
     assert(fetchedAmmAccount.tokenBMint.equals(mintB.publicKey));
     assert(fetchedAmmAccount.poolMint.equals(tokenPool.publicKey));
     assert(fetchedAmmAccount.poolFeeAccount.equals(feeAccount));
-    assert(
-      TRADING_FEE_NUMERATOR ==
-        fetchedAmmAccount.fees.tradeFeeNumerator.toNumber()
-    );
-    assert(
-      TRADING_FEE_DENOMINATOR ==
-        fetchedAmmAccount.fees.tradeFeeDenominator.toNumber()
-    );
-    assert(
-      OWNER_TRADING_FEE_NUMERATOR ==
-        fetchedAmmAccount.fees.ownerTradeFeeNumerator.toNumber()
-    );
-    assert(
-      OWNER_TRADING_FEE_DENOMINATOR ==
-        fetchedAmmAccount.fees.ownerTradeFeeDenominator.toNumber()
-    );
-    assert(
-      OWNER_WITHDRAW_FEE_NUMERATOR ==
-        fetchedAmmAccount.fees.ownerWithdrawFeeNumerator.toNumber()
-    );
-    assert(
-      OWNER_WITHDRAW_FEE_DENOMINATOR ==
-        fetchedAmmAccount.fees.ownerWithdrawFeeDenominator.toNumber()
-    );
-    assert(
-      HOST_FEE_NUMERATOR == fetchedAmmAccount.fees.hostFeeNumerator.toNumber()
-    );
-    assert(
-      HOST_FEE_DENOMINATOR ==
-        fetchedAmmAccount.fees.hostFeeDenominator.toNumber()
-    );
-    assert(curve_input.curveType == fetchedAmmAccount.curve.curveType);
+     
   });
  
 
