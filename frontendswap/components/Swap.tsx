@@ -11,7 +11,7 @@ import { FC, useState } from "react"
 import * as Web3 from "@solana/web3.js"
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import {
-    kryptMint,
+    wSolanaMint,
     ScroogeCoinMint,
     tokenSwapStateAccount,
     swapAuthority,
@@ -42,14 +42,14 @@ export const SwapToken: FC = () => {
             return
         }
 
-        const kryptMintInfo = await token.getMint(connection, kryptMint)
+        const kryptMintInfo = await token.getMint(connection, wSolanaMint)
         const ScroogeCoinMintInfo = await token.getMint(
             connection,
             ScroogeCoinMint
         )
 
         const kryptATA = await token.getAssociatedTokenAddress(
-            kryptMint,
+            wSolanaMint,
             publicKey
         )
         const scroogeATA = await token.getAssociatedTokenAddress(
@@ -119,10 +119,10 @@ export const SwapToken: FC = () => {
         try {
             let txid = await sendTransaction(transaction, connection)
             alert(
-                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=devnet`
+                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=testnet`
             )
             console.log(
-                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=devnet`
+                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=testnet`
             )
         } catch (e) {
             console.log(JSON.stringify(e))

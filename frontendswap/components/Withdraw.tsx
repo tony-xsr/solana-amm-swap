@@ -94,10 +94,10 @@ export const WithdrawSingleTokenType: FC = (props: {
         try {
             let txid = await sendTransaction(transaction, connection)
             alert(
-                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=devnet`
+                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=testnet`
             )
             console.log(
-                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=devnet`
+                `Transaction submitted: https://explorer.solana.com/tx/${txid}?cluster=testnet`
             )
         } catch (e) {
             console.log(JSON.stringify(e))
