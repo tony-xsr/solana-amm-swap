@@ -1,13 +1,15 @@
 import * as anchor from "@project-serum/anchor";
 import { Program } from "@project-serum/anchor";
-import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet";
-import { Amm } from "../target/types/amm";
+import NodeWallet from "@project-serum/anchor/dist/cjs/nodewallet"; 
+import ammIdl from "../target/idl/amm.json";
 import { PublicKey, Connection, Commitment } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID, Token, u64 } from "@solana/spl-token";
 import * as BufferLayout from "buffer-layout";
 import { assert } from "chai";
 import { TypeDef } from "@project-serum/anchor/dist/cjs/program/namespace/types";
-import { IdlTypeDef } from "@project-serum/anchor/dist/cjs/idl";
+import { Idl, } from "@project-serum/anchor/dist/cjs/idl"; 
+import dotenv from "dotenv";
+dotenv.config();
 
 const CurveType = Object.freeze({
   ConstantProduct: 0, // Constant product curve, Uniswap-style
@@ -17,17 +19,16 @@ const CurveType = Object.freeze({
 
 describe("amm", async () => {
   const commitment: Commitment = "processed";
-  const connection = new Connection("https://rpc-mainnet-fork.dappio.xyz", {
-    commitment,
-    wsEndpoint: "wss://rpc-mainnet-fork.dappio.xyz/ws",
-  });
+    
+  const connection = new Connection(process.env.SOLANA_RPC, commitment)
   const options = anchor.Provider.defaultOptions();
   const wallet = NodeWallet.local();
   const provider = new anchor.Provider(connection, wallet, options);
 
   anchor.setProvider(provider);
 
-  const program = anchor.workspace.Amm as Program<Amm>;
+  const programId = new PublicKey(process.env.PROGRAM_ID!);
+  const program = new Program(ammIdl as unknown as Idl, programId, provider);
 
   let authority: PublicKey;
   let bumpSeed: number;
