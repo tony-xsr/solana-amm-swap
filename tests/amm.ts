@@ -43,14 +43,20 @@ describe("amm", async () => {
   let tokenAccountB: PublicKey;
  
   // Initial amount in each swap token
-  let currentSwapTokenA = 1000000;
-  let currentSwapTokenB = 1000000; 
-  const SWAP_AMOUNT_IN = 100000;
-  const SLIPPAGE_MAX = 0;
+  // As pool initial 1000 token A
+  // and 100 token B
+  let currentSwapTokenA = 1000;
+  let currentSwapTokenB = 100;
+
+  //Swap 10 token B
+  const SWAP_AMOUNT_IN = 10;
+  // const SLIPPAGE_MAX = 0;
 
   // 10 Token B = 1 Token A
   // MIN OUT base on SLIPPAGE
-  const SWAP_AMOUNT_OUT = SWAP_AMOUNT_IN/10 - SLIPPAGE_MAX*(SWAP_AMOUNT_IN/10);
+  // Swap to get 1 token A
+  const SWAP_AMOUNT_OUT = SWAP_AMOUNT_IN/10
+  // - SLIPPAGE_MAX*(SWAP_AMOUNT_IN/10);
   
 
   const ammAccount = anchor.web3.Keypair.generate();
@@ -100,6 +106,7 @@ describe("amm", async () => {
     tokenAccountA = await mintA.createAccount(authority);
     // minting token A to swap
     await mintA.mintTo(tokenAccountA, owner, [], currentSwapTokenA);
+
 
     // creating token B
     mintB = await Token.createMint(
@@ -163,12 +170,16 @@ describe("amm", async () => {
     assert(fetchedAmmAccount.tokenBMint.equals(mintB.publicKey));
     assert(fetchedAmmAccount.poolMint.equals(tokenPool.publicKey));
     assert(fetchedAmmAccount.poolFeeAccount.equals(feeAccount));
-     
   });
 
+  // In this test, i will
+  // trying to Swap 1 token B
+  // and i should receive 10 token A.
   it("Swap", async () => {
     // Creating swap token a account
     let userAccountA = await mintA.createAccount(owner.publicKey);
+    // Mint amount of SWAP_AMOUNT_IN token A 
+    // send to a user Token Account.
     await mintA.mintTo(userAccountA, owner, [], SWAP_AMOUNT_IN);
     const userTransferAuthority = anchor.web3.Keypair.generate();
     await mintA.approve(
@@ -178,11 +189,31 @@ describe("amm", async () => {
       [],
       SWAP_AMOUNT_IN
     );
-    // Creating swap token b account
+    // Creating Token Account for B token.
     let userAccountB = await mintB.createAccount(owner.publicKey);
- 
-    // Swapping
+    
+    let infoTokenAccountA = await mintA.getAccountInfo(tokenAccountA);
 
+    console.log("infoTokenAccountA : " + infoTokenAccountA.amount.toNumber())
+    let infoUserAccountA = await mintA.getAccountInfo(userAccountA);
+    let infoUserAccountB = await mintB.getAccountInfo(userAccountB);
+    
+    console.log("infoUserAccountA : " + infoUserAccountA.address);
+    console.log("infoUserAccountA : " + infoUserAccountA.amount.toNumber());
+    console.log("infoUserAccountB : " + infoUserAccountB.address);
+    console.log("infoUserAccountB : " + infoUserAccountB.amount.toNumber());
+    
+    //Wallet should hodl amount of SWAP_AMOUNT_IN token A
+    assert(infoUserAccountA.amount.toNumber() == SWAP_AMOUNT_IN);
+
+    //Wallet is empty amount of token B . Its should Zero 
+    assert(infoUserAccountB.amount.toNumber() == 0);
+    console.log("Swap is starting....");
+    
+    // Swapping SWAP_AMOUNT_IN token A 
+    // Its should received amount toke B 
+    // Base on Const Curve Price of 
+    // 10 token A = 1 token B
     await program.rpc.swap(
       new anchor.BN(SWAP_AMOUNT_IN), 
       new anchor.BN(SWAP_AMOUNT_OUT),
@@ -203,29 +234,39 @@ describe("amm", async () => {
         signers: [userTransferAuthority],
       }
     );
+    console.log("Swap finished....");
+    infoUserAccountA = await mintA.getAccountInfo(userAccountA);
 
-    let info;
-    info = await mintA.getAccountInfo(userAccountA);
-    assert(info.amount.toNumber() == 0);
-
-    info = await mintB.getAccountInfo(userAccountB);
-     
-    console.log(info.amount.toNumber() == SWAP_AMOUNT_OUT);
+    console.log("Amount Of token A");
+    console.log("infoUserAccountA : " + infoUserAccountA.address);
+    console.log("infoUserAccountA : " + infoUserAccountA.amount.toNumber());
+    //After successfully swapped , wallet should empty amount of A token
+    assert(infoUserAccountA.amount.toNumber() == 0);
     
-    assert(info.amount.toNumber() == SWAP_AMOUNT_OUT);
+    infoUserAccountB = await mintB.getAccountInfo(userAccountB);
 
-    info = await mintA.getAccountInfo(tokenAccountA);
+    console.log("Amount Of token B");
+    console.log("infoUserAccountB : " + infoUserAccountB.address);
+    console.log("infoUserAccountB : " + infoUserAccountB.amount.toNumber());
+    //After successfully swapped , wallet should hodl
+    //amount of B token base on SWAP_AMOUNT_IN/10
+    //Its mean 10 token A = 1 token B 
+    assert(infoUserAccountB.amount.toNumber() == SWAP_AMOUNT_OUT);
 
+      infoTokenAccountA = await mintA.getAccountInfo(tokenAccountA);
+    
+    console.log("infoTokenAccountA : " + infoTokenAccountA.amount.toNumber())
 
-    assert(info.amount.toNumber() == currentSwapTokenA + SWAP_AMOUNT_IN);
+    assert(infoTokenAccountA.amount.toNumber() == currentSwapTokenA + SWAP_AMOUNT_IN);
     currentSwapTokenA += SWAP_AMOUNT_IN;
-
-    info = await mintB.getAccountInfo(tokenAccountB);
+  
+    const infoTokenAccountB = await mintB.getAccountInfo(tokenAccountB);
  
+    console.log("infoTokenAccountB : " + infoTokenAccountB.amount.toNumber())
 
-    assert(info.amount.toNumber() == currentSwapTokenB - SWAP_AMOUNT_OUT);
+    assert(infoTokenAccountB.amount.toNumber() == currentSwapTokenB - SWAP_AMOUNT_OUT);
     currentSwapTokenB -= SWAP_AMOUNT_OUT;
-
+    
 
 
      
