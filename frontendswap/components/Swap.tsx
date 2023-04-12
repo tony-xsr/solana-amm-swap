@@ -9,24 +9,34 @@ import {
 } from "@chakra-ui/react"
 import { FC, useState } from "react"
 import * as Web3 from "@solana/web3.js"
+import { Program } from "@project-serum/anchor";
+import { PublicKey, Connection, Commitment } from "@solana/web3.js";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react"
 import {
+    MoveCoinMint,
     wSolanaMint,
-    ScroogeCoinMint,
     tokenSwapStateAccount,
     swapAuthority,
-    poolKryptAccount,
-    poolScroogeAccount,
+    poolMoveAccount,
+    poolWSOLAccount,
+    TOKEN_SWAP_PROGRAM_ID,
     poolMint,
     feeAccount,
 } from "../utils/constants"
-import { TokenSwap, TOKEN_SWAP_PROGRAM_ID } from "@solana/spl-token-swap"
+import ammIdl from "./target/idl/amm.json";
+
+import { Idl, } from "@project-serum/anchor/dist/cjs/idl"; 
+
+import { TokenSwap } from "@solana/spl-token-swap"
 import * as token from "@solana/spl-token"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token"
 
 export const SwapToken: FC = () => {
     const [amount, setAmount] = useState(0)
     const [mint, setMint] = useState("")
+
+    // const programId = new PublicKey("6VL38pW6bCq2muuCmnF7Hcb1HHwFZ5KPLm4kfEPTLDjH");
+    // const program = new Program(ammIdl as unknown as Idl, programId, provider);
 
     const { connection } = useConnection()
     const { publicKey, sendTransaction } = useWallet()
@@ -42,18 +52,18 @@ export const SwapToken: FC = () => {
             return
         }
 
-        const kryptMintInfo = await token.getMint(connection, wSolanaMint)
+        const kryptMintInfo = await token.getMint(connection, MoveCoinMint)
         const ScroogeCoinMintInfo = await token.getMint(
             connection,
-            ScroogeCoinMint
+            wSolanaMint
         )
 
         const kryptATA = await token.getAssociatedTokenAddress(
-            wSolanaMint,
+            MoveCoinMint,
             publicKey
         )
         const scroogeATA = await token.getAssociatedTokenAddress(
-            ScroogeCoinMint,
+            wSolanaMint,
             publicKey
         )
         const tokenAccountPool = await token.getAssociatedTokenAddress(
@@ -82,8 +92,8 @@ export const SwapToken: FC = () => {
                 swapAuthority,
                 publicKey,
                 kryptATA,
-                poolKryptAccount,
-                poolScroogeAccount,
+                poolMoveAccount,
+                poolWSOLAccount,
                 scroogeATA,
                 poolMint,
                 feeAccount,
@@ -101,8 +111,8 @@ export const SwapToken: FC = () => {
                 swapAuthority,
                 publicKey,
                 scroogeATA,
-                poolScroogeAccount,
-                poolKryptAccount,
+                poolWSOLAccount,
+                poolMoveAccount,
                 kryptATA,
                 poolMint,
                 feeAccount,
@@ -167,14 +177,14 @@ export const SwapToken: FC = () => {
                                 value="option1"
                             >
                                 {" "}
-                                wSOL{" "}
+                                MOVE{" "}
                             </option>
                             <option
                                 style={{ color: "#282c34" }}
                                 value="option2"
                             >
                                 {" "}
-                                MOVE{" "}
+                                wSOL{" "}
                             </option>
                         </Select>
                     </div>
